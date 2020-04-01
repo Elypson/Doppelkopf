@@ -6,7 +6,7 @@
 
     <script>
         var ws;
-        window.onload = function () {
+        function connect(username) {
             var log = (msg) => document.getElementById('output').innerHTML += msg + "<br/>";
 
             (_ => log("started!"))();
@@ -16,16 +16,29 @@
             log(ws.protocol);
 
             ws.addEventListener('open', function (event) {
-                log("opened");
+                log("Connection opened");
                 ws.send('Hello Server!');
             });
 
             ws.addEventListener('message', function (event) {
-                log('Message from server ' + event.data);
+                const obj = JSON.parse(event.data);
+
+                switch (obj.Type) {
+                    case 0: /* META */
+                        switch (obj.SubType) {
+                            case 'token':
+                                token = obj.Text;
+                                ws.send('{"Type":0,"SubType":"name","Text":"' + username + '"}');
+                                break;
+                            case 'join':
+                                log(obj.Text + " has joined!");
+                                break;
+                        }
+                }
             });
 
             ws.addEventListener('close', function (event) {
-                log('Closed');
+                log('Connection closed, my token is ' + token);
             });
 
             
@@ -33,6 +46,9 @@
 </head>
 <body>
     <div id="output"></div>
+
+    <input type="text" name="username" placeholder="Your nick" /><input type="button" value="Join" onclick="connect(document.getElementsByName('username')[0].value)" />
+                                                                        
     <input type="button" value="Send" onclick="ws.send('Button');" />
     <input type="button" value="Close" onclick="ws.close();" />
 </body>

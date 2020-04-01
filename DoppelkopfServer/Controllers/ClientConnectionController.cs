@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -37,10 +38,13 @@ namespace DoppelkopfServer.Controllers
             }
         }
 
-        public async Task Handle(HttpContext context)
+        public async Task Initialize(HttpContext context)
         {
             socket = await context.WebSockets.AcceptWebSocketAsync();
+        }
 
+        public async Task Handle(HttpContext context)
+        {
             var buffer = new byte[1024 * 4];
 
             WebSocketReceiveResult result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -55,8 +59,9 @@ namespace DoppelkopfServer.Controllers
 
                     MessageReceived?.Invoke(this, new MessageReceivedArgs { Message = message });
                 }
-                catch(JsonException)
+                catch(JsonException e)
                 {
+                    Debug.WriteLine(e);
                     // ignore invalid messages
                 }
             }

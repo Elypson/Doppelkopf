@@ -14,7 +14,7 @@ namespace DoppelkopfServer.Models
         // Text contains additional information or just Text in case of chats
         public string Text { get; set; }
 
-        // Token in only sent by server
+        // Token is only used by server
         public string Token { get; set; }
 
         // Username is only sent by server

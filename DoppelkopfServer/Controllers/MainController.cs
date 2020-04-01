@@ -41,6 +41,18 @@ namespace DoppelkopfServer.Controllers
             });            
 
             clientControllers.Add(newController);
+
+            // socket needs to be initialized before we can continue
+            newController.Initialize(context).Wait();
+
+            // let client know their token
+            newController.SendSync(new Message
+            {
+                Type = Message.MessageType.META,
+                SubType = "token",
+                Text = context.Connection.Id
+            });
+
             await newController.Handle(context);
 
             Debug.Write("Client disconnected from " + clientControllers.Count);
@@ -103,7 +115,8 @@ namespace DoppelkopfServer.Controllers
             {
                 case "name":
                     // does user exist?
-                    var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault(null);
+                    var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault();
+                    
                     Message responseToAll;
                     if (existingUser != null)
                     {
@@ -130,10 +143,9 @@ namespace DoppelkopfServer.Controllers
                         };
                     }
 
-                    SendTo(message, clientControllers);
+                    SendTo(responseToAll, clientControllers);
 
                     break;
-                }
             }
         }
     }
