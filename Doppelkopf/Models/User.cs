@@ -1,5 +1,5 @@
 ﻿using System;
-namespace DoppelkopfServer.Models
+namespace Doppelkopf.Models
 {
     public class User
     {
@@ -8,6 +8,7 @@ namespace DoppelkopfServer.Models
             ConnectionID = connectionID;
             Name = name;
             TableID = NO_TABLE;
+            Online = true;
         }
 
         public const int NO_TABLE = -1;
@@ -15,5 +16,6 @@ namespace DoppelkopfServer.Models
         public string ConnectionID { get; }
         public string Name { get; set; }
         public int TableID { get; set; }
+        public bool Online { get; set; }
     }
 }

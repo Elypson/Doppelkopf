@@ -1,5 +1,5 @@
 ﻿using System;
-namespace DoppelkopfServer.Models
+namespace Doppelkopf.Models
 {
     // name: means that user sends their new username with Text="<username>"
     //  (must come directly after attained token, otherwise no user is created)

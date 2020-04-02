@@ -30,6 +30,7 @@
                             case 'token':
                                 token = obj.Text;
                                 ws.send('{"Type":0,"SubType":"name","Text":"' + username + '"}');
+                                ws.send(JSON.stringify({ "Type": 0, "SubType": "userlist" }));
                                 myUsername = username;
                                 break;
                             case 'join':
@@ -37,6 +38,10 @@
                                 break;
                             case 'quit':
                                 log(">> " + obj.Text + " has left.");
+                                break;
+                            case 'userlist':
+                                log(obj.Text);
+                                break;
                         }
                         break;
 

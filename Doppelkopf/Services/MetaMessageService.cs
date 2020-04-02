@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DoppelkopfServer.Controllers;
-using DoppelkopfServer.Interfaces;
-using DoppelkopfServer.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Doppelkopf.Controllers;
+using Doppelkopf.Interfaces;
+using Doppelkopf.Models;
 
-namespace DoppelkopfServer.Services
+namespace Doppelkopf.Services
 {
     public class MetaMessageService : IMetaMessageService
     {
@@ -21,39 +23,64 @@ namespace DoppelkopfServer.Services
             switch (message.SubType)
             {
                 case "name":
-                    // does user exist?
-                    var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault();
+                    HandleNameSubType(users, clientConnectionControllers, message);
+                    break;
 
-                    ServerMessage responseToAll;
-                    if (existingUser != null)
-                    {
-                        string oldUserName = existingUser.Name;
-                        existingUser.Name = message.Text;
-                        responseToAll = new ServerMessage
-                        {
-                            Type = Message.MessageType.META,
-                            SubType = "rename",
-                            Text = oldUserName,
-                            Username = existingUser.Name
-                        };
-                    }
-                    else
-                    {
-                        User user = new User(message.Token, message.Text);
-                        users.Add(user);
-
-                        responseToAll = new ServerMessage
-                        {
-                            Type = Message.MessageType.META,
-                            SubType = "join",
-                            Text = user.Name
-                        };
-                    }
-
-                    sendService.SendTo(responseToAll, from clientController in clientConnectionControllers select clientController.Socket);
-
+                case "userlist":
+                    HandleUserlistSubType(users, clientConnectionControllers, message);
                     break;
             }
+        }
+
+        public void HandleNameSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers,
+            ClientMessage message)
+        {
+            // does user exist?
+            var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault();
+
+            ServerMessage responseToAll;
+            if (existingUser != null)
+            {
+                string oldUserName = existingUser.Name;
+                existingUser.Name = message.Text;
+                responseToAll = new ServerMessage
+                {
+                    Type = Message.MessageType.META,
+                    SubType = "rename",
+                    Text = oldUserName,
+                    Username = existingUser.Name
+                };
+            }
+            else
+            {
+                User user = new User(message.Token, message.Text);
+                users.Add(user);
+
+                responseToAll = new ServerMessage
+                {
+                    Type = Message.MessageType.META,
+                    SubType = "join",
+                    Text = user.Name
+                };
+            }
+
+            sendService.SendTo(from clientController in clientConnectionControllers select clientController.Socket, responseToAll);
+        }
+
+        public void HandleUserlistSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers,
+            ClientMessage message)
+        {
+            string userList = JsonSerializer.Serialize(from user in users where user.Online select new {Username = user.Name, TableID = user.TableID});
+
+            var response = new ServerMessage
+            {
+                Type = Message.MessageType.META,
+                SubType = "userlist",
+                Text = userList
+            };
+
+            sendService.SendSyncToClient((from controller in clientConnectionControllers where controller.ConnectionID == message.Token
+                   select controller.Socket).First(), response);
         }
     }
 }

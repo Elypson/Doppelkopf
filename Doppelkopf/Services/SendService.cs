@@ -4,14 +4,14 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using DoppelkopfServer.Interfaces;
-using DoppelkopfServer.Models;
+using Doppelkopf.Interfaces;
+using Doppelkopf.Models;
 
-namespace DoppelkopfServer.Services
+namespace Doppelkopf.Services
 {
     public class SendService : ISendService
     {
-        public void SendTo(ServerMessage message, IEnumerable<WebSocket> recipients)
+        public void SendTo(IEnumerable<WebSocket> recipients, ServerMessage message)
         {
             foreach (var recipient in recipients)
             {

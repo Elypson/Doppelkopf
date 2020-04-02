@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using DoppelkopfServer.Controllers;
-using DoppelkopfServer.Models;
+using Doppelkopf.Controllers;
+using Doppelkopf.Models;
 
-namespace DoppelkopfServer.Interfaces
+namespace Doppelkopf.Interfaces
 {
     public interface IMetaMessageService : IMessageService
     {

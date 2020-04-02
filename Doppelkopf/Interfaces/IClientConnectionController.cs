@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
-using DoppelkopfServer.Models;
+using Doppelkopf.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace DoppelkopfServer.Interfaces
+namespace Doppelkopf.Interfaces
 {
     public interface IClientConnectionController
     {

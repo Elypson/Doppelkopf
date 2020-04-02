@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Threading;
 using System.Collections.Concurrent;
-using DoppelkopfServer.Models;
+using Doppelkopf.Models;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Linq;
-using DoppelkopfServer.Services;
-using DoppelkopfServer.Interfaces;
+using Doppelkopf.Services;
+using Doppelkopf.Interfaces;
 
-namespace DoppelkopfServer.Controllers
+namespace Doppelkopf.Controllers
 {
     public class MainController : IMainController
     {
@@ -21,12 +21,15 @@ namespace DoppelkopfServer.Controllers
         private Thread serverThread = new Thread(MainController.RunServer);
         private List<User> users = new List<User>();
         private readonly ISendService sendService;
-        private readonly IMetaMessageService metaMessageService;
+        private Dictionary<Message.MessageType, IMessageService> messageServices = new Dictionary<Message.MessageType, IMessageService>();
 
-        public MainController(ISendService _sendService, IMetaMessageService _metaMessageService)
+        public MainController(ISendService _sendService, IMetaMessageService metaMessageService, IChatMessageService chatMessageService,
+            IGameMessageService gameMessageService)
         {
             sendService = _sendService;
-            metaMessageService = _metaMessageService;
+            messageServices.Add(Message.MessageType.META, metaMessageService);
+            messageServices.Add(Message.MessageType.CHAT, chatMessageService);
+            messageServices.Add(Message.MessageType.GAME, gameMessageService);
             serverThread.Start(this);
         }
 
@@ -35,7 +38,7 @@ namespace DoppelkopfServer.Controllers
             var newController = new ClientConnectionController();
             newController.MessageReceived += new EventHandler((Object source, EventArgs rawArgs) =>
             {
-                var args = (ClientConnectionController.MessageReceivedArgs)rawArgs;
+                var args = (IClientConnectionController.MessageReceivedArgs)rawArgs;
                 clientMessages.Enqueue(args.Message);
             });            
 
@@ -53,14 +56,15 @@ namespace DoppelkopfServer.Controllers
             });
 
             await newController.Handle(context);
-
+            
             clientControllers.Remove(newController);
 
             // find user that has left but keep him in case that reclaim is demanded
             var leftUser = users.Find(user => user.ConnectionID == newController.ConnectionID);
 
-            sendService.SendTo(new ServerMessage { Type = Message.MessageType.META, SubType = "quit", Text = leftUser?.Name },
-                from clientController in clientControllers select clientController.Socket);
+            leftUser.Online = false;
+
+            sendService.SendTo(from clientController in clientControllers select clientController.Socket, new ServerMessage { Type = Message.MessageType.META, SubType = "quit", Text = leftUser?.Name });
         }
 
         public static void RunServer(object parameter)
@@ -75,39 +79,10 @@ namespace DoppelkopfServer.Controllers
 
                 while(mainController.clientMessages.TryDequeue(out message))
                 {
-                    switch(message.Type)
-                    {
-                        case Message.MessageType.META:
-                            mainController.metaMessageService.HandleMessage(mainController.users, mainController.clientControllers, message);
-                            break;
-
-                        case Message.MessageType.CHAT:
-                            mainController.chatMessageService.HandleMessage()
-                            break;
-
-                        case Message.MessageType.GAME:
-                            mainController.HandleGameMessage(message);
-                            break;
-                    }
+                    mainController.messageServices[message.Type].HandleMessage(
+                        mainController.users, mainController.clientControllers, message);
                 }
-                
-            }
-        }        
 
-        private void HandleChatMessage(ClientMessage message)
-        {
-            // does user exist? only named users can send messages (if not named, client should use META "name")
-            var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault();
-            
-            if(existingUser != null)
-            {
-                var otherClientsAtSameTableOrGlobal = clientControllers.Where(client =>
-                    users.Exists(user => client.ConnectionID == user.ConnectionID &&
-                    user.TableID == existingUser.TableID && user.ConnectionID != existingUser.ConnectionID));
-
-                var serverMessage = new ServerMessage(message, existingUser.Name);
-
-                sendService.SendTo(serverMessage, from otherClient in otherClientsAtSameTableOrGlobal select otherClient.Socket);
             }
         }
     }

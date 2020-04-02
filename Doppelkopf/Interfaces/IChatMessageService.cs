@@ -1,5 +1,5 @@
 ﻿using System;
-namespace DoppelkopfServer.Interfaces
+namespace Doppelkopf.Interfaces
 {
     public interface IChatMessageService : IMessageService
     {

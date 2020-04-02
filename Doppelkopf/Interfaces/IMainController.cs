@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace DoppelkopfServer.Interfaces
+namespace Doppelkopf.Interfaces
 {
     public interface IMainController
     {

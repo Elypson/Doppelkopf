@@ -1,5 +1,5 @@
 ﻿using System;
-namespace DoppelkopfServer.Models
+namespace Doppelkopf.Models
 {
     // Message can come from server (ServerMessage) or client (Message that is extended by Server with Token to get ClientMessage),
     // details are in the respective files

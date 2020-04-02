@@ -11,19 +11,21 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading;
 using System.IO;
-using DoppelkopfServer.Controllers;
-using DoppelkopfServer.Interfaces;
-using DoppelkopfServer.Services;
+using Doppelkopf.Controllers;
+using Doppelkopf.Interfaces;
+using Doppelkopf.Services;
 
-namespace DoppelkopfServer
+namespace Doppelkopf
 {
     public class Startup
     {
         // configure services
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ISendService, SendService>();
+            services.AddTransient<ISendService, SendService>();
             services.AddSingleton<IMetaMessageService, MetaMessageService>();
+            services.AddSingleton<IChatMessageService, ChatMessageService>();
+            services.AddSingleton<IGameMessageService, GameMessageService>();
             services.AddSingleton<IMainController, MainController>();
         }
 

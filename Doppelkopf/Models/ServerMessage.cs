@@ -1,5 +1,5 @@
 ﻿using System;
-namespace DoppelkopfServer.Models
+namespace Doppelkopf.Models
 {
     // if MessageType is META, then Subtype has further information
     // token: means that user should memorize the token provided by Text in case of connection issues, so they can reclaim a player

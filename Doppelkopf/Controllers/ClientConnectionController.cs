@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using DoppelkopfServer.Interfaces;
-using DoppelkopfServer.Models;
+using Doppelkopf.Interfaces;
+using Doppelkopf.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace DoppelkopfServer.Controllers
+namespace Doppelkopf.Controllers
 {
     public class ClientConnectionController : IClientConnectionController
     {
