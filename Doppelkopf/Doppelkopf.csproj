@@ -8,6 +8,8 @@
     <Folder Include="Controllers\" />
     <Folder Include="Client\" />
     <Folder Include="Models\" />
+    <Folder Include="Services\" />
+    <Folder Include="Interfaces\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
