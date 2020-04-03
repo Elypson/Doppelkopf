@@ -16,12 +16,12 @@ namespace Doppelkopf.Controllers
 {
     public class MainController : IMainController
     {
-        private List<ClientConnectionController> clientControllers = new List<ClientConnectionController>();
-        private ConcurrentQueue<ClientMessage> clientMessages = new ConcurrentQueue<ClientMessage>();
-        private Thread serverThread = new Thread(MainController.RunServer);
-        private List<User> users = new List<User>();
+        private readonly List<ClientConnectionController> clientControllers = new List<ClientConnectionController>();
+        private readonly ConcurrentQueue<ClientMessage> clientMessages = new ConcurrentQueue<ClientMessage>();
+        private readonly Thread serverThread = new Thread(MainController.RunServer);
+        private readonly List<User> users = new List<User>();
         private readonly ISendService sendService;
-        private Dictionary<Message.MessageType, IMessageService> messageServices = new Dictionary<Message.MessageType, IMessageService>();
+        private readonly Dictionary<Message.MessageType, IMessageService> messageServices = new Dictionary<Message.MessageType, IMessageService>();
 
         public MainController(ISendService _sendService, IMetaMessageService metaMessageService, IChatMessageService chatMessageService,
             IGameMessageService gameMessageService)
@@ -33,19 +33,19 @@ namespace Doppelkopf.Controllers
             serverThread.Start(this);
         }
 
-        public async Task ManageWebSocketRequest(HttpContext context)
+        public async Task ManageWebSocketRequestAsync(HttpContext context)
         {
             var newController = new ClientConnectionController();
-            newController.MessageReceived += new EventHandler((Object source, EventArgs rawArgs) =>
+            newController.MessageReceived += (Object source, EventArgs rawArgs) =>
             {
                 var args = (IClientConnectionController.MessageReceivedArgs)rawArgs;
                 clientMessages.Enqueue(args.Message);
-            });            
+            };          
 
             clientControllers.Add(newController);
 
             // socket needs to be initialized before we can continue
-            newController.Initialize(context).Wait();
+            newController.InitializeAsync(context).Wait();
 
             // let client know their token
             sendService.SendSyncToClient(newController.Socket, new ServerMessage
@@ -55,7 +55,7 @@ namespace Doppelkopf.Controllers
                 Text = context.Connection.Id
             });
 
-            await newController.Handle(context);
+            await newController.HandleAsync(context);
             
             clientControllers.Remove(newController);
 
@@ -64,7 +64,7 @@ namespace Doppelkopf.Controllers
 
             leftUser.Online = false;
 
-            sendService.SendTo(from clientController in clientControllers select clientController.Socket, new ServerMessage { Type = Message.MessageType.META, SubType = "quit", Text = leftUser?.Name });
+            sendService.SendTo(from clientController in clientControllers select clientController.Socket, new ServerMessage { Type = Message.MessageType.META, SubType = "quit", Text = leftUser.Name });
         }
 
         public static void RunServer(object parameter)
@@ -75,9 +75,7 @@ namespace Doppelkopf.Controllers
             {
                 Thread.Sleep(1);
 
-                ClientMessage message;
-
-                while(mainController.clientMessages.TryDequeue(out message))
+                while(mainController.clientMessages.TryDequeue(out var message))
                 {
                     mainController.messageServices[message.Type].HandleMessage(
                         mainController.users, mainController.clientControllers, message);

@@ -7,6 +7,6 @@ namespace Doppelkopf.Interfaces
     public interface IMainController
     {
         // accept a websocket request, create ClientConnectionController and publish it with MainController's event queue
-        Task ManageWebSocketRequest(HttpContext context);
+        Task ManageWebSocketRequestAsync(HttpContext context);
     }
 }

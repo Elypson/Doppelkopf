@@ -18,13 +18,13 @@ namespace Doppelkopf.Controllers
 
         public event EventHandler MessageReceived;
 
-        public async Task Initialize(HttpContext context)
+        public async Task InitializeAsync(HttpContext context)
         {
             Socket = await context.WebSockets.AcceptWebSocketAsync();
             ConnectionID = context.Connection.Id;
         }
 
-        public async Task Handle(HttpContext context)
+        public async Task HandleAsync(HttpContext context)
         {
             var buffer = new byte[1024 * 4];
 

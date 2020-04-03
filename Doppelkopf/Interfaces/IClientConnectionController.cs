@@ -19,9 +19,9 @@ namespace Doppelkopf.Interfaces
         }
 
         // accept socket from context and memorize socket
-        Task Initialize(HttpContext context);
+        Task InitializeAsync(HttpContext context);
 
         // start client event loop
-        Task Handle(HttpContext context);
+        Task HandleAsync(HttpContext context);
     }
 }

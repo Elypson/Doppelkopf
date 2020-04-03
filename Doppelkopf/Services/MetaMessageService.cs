@@ -36,22 +36,10 @@ namespace Doppelkopf.Services
             ClientMessage message)
         {
             // does user exist?
-            var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault();
+            var existingUser = users.FirstOrDefault(user => user.ConnectionID == message.Token);
 
             ServerMessage responseToAll;
-            if (existingUser != null)
-            {
-                string oldUserName = existingUser.Name;
-                existingUser.Name = message.Text;
-                responseToAll = new ServerMessage
-                {
-                    Type = Message.MessageType.META,
-                    SubType = "rename",
-                    Text = oldUserName,
-                    Username = existingUser.Name
-                };
-            }
-            else
+            if (existingUser == null)
             {
                 User user = new User(message.Token, message.Text);
                 users.Add(user);
@@ -61,6 +49,18 @@ namespace Doppelkopf.Services
                     Type = Message.MessageType.META,
                     SubType = "join",
                     Text = user.Name
+                };
+            }
+            else
+            {
+                string oldUserName = existingUser.Name;
+                existingUser.Name = message.Text;
+                responseToAll = new ServerMessage
+                {
+                    Type = Message.MessageType.META,
+                    SubType = "rename",
+                    Text = oldUserName,
+                    Username = existingUser.Name
                 };
             }
 

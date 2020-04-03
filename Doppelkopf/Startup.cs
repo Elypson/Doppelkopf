@@ -51,7 +51,7 @@ namespace Doppelkopf
                     if(context.WebSockets.IsWebSocketRequest)
                     {
                         var mainController = app.ApplicationServices.GetRequiredService<IMainController>();
-                        await mainController.ManageWebSocketRequest(context);
+                        await mainController.ManageWebSocketRequestAsync(context);
                     }
                     else
                     {
