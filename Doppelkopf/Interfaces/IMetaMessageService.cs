@@ -4,7 +4,8 @@ using Doppelkopf.Models;
 
 namespace Doppelkopf.Interfaces
 {
-    public interface IMetaMessageService : IMessageService
+    public interface IMetaMessageService
     {
+        void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<GameController> gameControllers, ClientMessage message);
     }
 }

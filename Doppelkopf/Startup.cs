@@ -25,7 +25,6 @@ namespace Doppelkopf
             services.AddTransient<ISendService, SendService>();
             services.AddSingleton<IMetaMessageService, MetaMessageService>();
             services.AddSingleton<IChatMessageService, ChatMessageService>();
-            services.AddSingleton<IGameMessageService, GameMessageService>();
             services.AddSingleton<IMainController, MainController>();
         }
 

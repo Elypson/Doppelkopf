@@ -16,7 +16,7 @@
 
             ws.addEventListener('open', function (event) {
                 log("Connection opened");
-                ws.send('Hello Server!');
+
             });
 
             ws.addEventListener('message', function (event) {
@@ -39,9 +39,11 @@
                             case 'quit':
                                 log(">> " + obj.Text + " has left.");
                                 break;
-                            case 'userlist':
+                            case 'listUsers':
                                 log(obj.Text);
                                 break;
+                            case 'listTables':
+                                log(obj.Text);
                         }
                         break;
 
@@ -65,16 +67,41 @@
             messageInput.value = "";
             messageInput.focus();
         }
+
+        function createTable() {
+            var tableName = document.getElementsByName('tableName')[0];
+            var password = document.getElementsByName('password')[0];
+            var hidden = document.getElementsByName('hidden')[0];
+
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "createTable", "Text": { "Name": tableName.value, "Password": password.value, "Hidden": hidden ? "true" : "false" } }));
+        }
+
+        function userList() {
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "listUsers" }));
+        }
+
+        function tableList() {
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "listTables" }));
+        }
+
     </script>
 </head>
 <body>
     <div id="output"></div>
 
-    <input tabindex="1" type="text" name="username" placeholder="Your nick" />
-    <input tabindex="2" type="button" value="Join" onclick="connect(document.getElementsByName('username')[0].value)" />
-                                                                        
-    <input tabindex="3" type="text" name="message" onkeypress="if(event.which == 13 || event.keyCode == 13) sendMessage();"/>
-    <input tabindex="4" type="button" value="Send" onclick="sendMessage();" />
-    <input tabindex="5" type="button" value="Close" onclick="ws.close();" />
+    <input type="text" name="username" placeholder="Your nick" />
+    <input type="button" value="Join" onclick="connect(document.getElementsByName('username')[0].value)" />
+
+    <input type="text" name="message" onkeypress="if(event.which == 13 || event.keyCode == 13) sendMessage();" />
+    <input type="button" value="Send" onclick="sendMessage();" />
+    <input type="button" value="Close" onclick="ws.close();" />
+
+    <input type="text" name="tableName" onkeypress="if(event.which == 13 || event.keyCode == 13) createTable();" />
+    <input type="text" name="password" onkeypress="if(event.which == 13 || event.keyCode == 13) createTable();" />
+    <input type="checkbox" name="hidden" />
+    <input type="button" value="Create Table" onclick="createTable();" />
+
+    <input type="button" name="User list" onclick="userList();" />
+    <input type="button" name="Table list" onclick="tableList();" />
 </body>
 </html>

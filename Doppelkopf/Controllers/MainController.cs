@@ -21,15 +21,17 @@ namespace Doppelkopf.Controllers
         private readonly Thread serverThread = new Thread(MainController.RunServer);
         private readonly List<User> users = new List<User>();
         private readonly ISendService sendService;
-        private readonly Dictionary<Message.MessageType, IMessageService> messageServices = new Dictionary<Message.MessageType, IMessageService>();
+        private readonly IChatMessageService chatMessageService;
+        private readonly IMetaMessageService metaMessageService;
 
-        public MainController(ISendService _sendService, IMetaMessageService metaMessageService, IChatMessageService chatMessageService,
-            IGameMessageService gameMessageService)
+        // TableID maps to game controller
+        List<IGameController> gameControllers = new List<IGameController>();    
+
+        public MainController(ISendService _sendService, IMetaMessageService _metaMessageService, IChatMessageService _chatMessageService)
         {
             sendService = _sendService;
-            messageServices.Add(Message.MessageType.META, metaMessageService);
-            messageServices.Add(Message.MessageType.CHAT, chatMessageService);
-            messageServices.Add(Message.MessageType.GAME, gameMessageService);
+            chatMessageService = _chatMessageService;
+            metaMessageService = _metaMessageService;
             serverThread.Start(this);
         }
 
@@ -50,7 +52,7 @@ namespace Doppelkopf.Controllers
             // let client know their token
             sendService.SendSyncToClient(newController.Socket, new ServerMessage
             {
-                Type = Message.MessageType.META,
+                Type = Message.MessageType.Meta,
                 SubType = "token",
                 Text = context.Connection.Id
             });
@@ -64,7 +66,27 @@ namespace Doppelkopf.Controllers
 
             leftUser.Online = false;
 
-            sendService.SendTo(from clientController in clientControllers select clientController.Socket, new ServerMessage { Type = Message.MessageType.META, SubType = "quit", Text = leftUser.Name });
+            sendService.SendTo(from clientController in clientControllers select clientController.Socket, new ServerMessage { Type = Message.MessageType.Meta, SubType = "quit", Text = leftUser.Name });
+        }
+
+        void handleGameMessage(ClientMessage message)
+        {
+            var user = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+
+            if (user == null || user.TableID == User.NO_TABLE)
+                return;
+
+            IGameController gameController = gameControllers.FirstOrDefault(controller => controller.TableID == user.TableID);
+
+            // game needs to exist because someone needs to start it
+            if (gameControllers != null)
+            {
+                gameController.HandleMessage(message);
+            }
+            else
+            {
+                // drop?
+            }
         }
 
         public static void RunServer(object parameter)
@@ -77,10 +99,19 @@ namespace Doppelkopf.Controllers
 
                 while(mainController.clientMessages.TryDequeue(out var message))
                 {
-                    mainController.messageServices[message.Type].HandleMessage(
-                        mainController.users, mainController.clientControllers, message);
+                    switch(message.Type)
+                    {
+                        case Message.MessageType.Meta:
+                            mainController.metaMessageService.HandleMessage(mainController.users, mainController.clientControllers, mainController.gameControllers, message);
+                            break;
+                        case Message.MessageType.Chat:
+                            mainController.chatMessageService.HandleMessage(mainController.users, mainController.clientControllers, message);
+                            break;
+                        case Message.MessageType.Game:
+                            mainController.handleGameMessage(message);
+                            break;
+                    }
                 }
-
             }
         }
     }

@@ -15,7 +15,7 @@ namespace Doppelkopf.Models
             Text = message.Text;
         }
 
-        public enum MessageType { META, CHAT, GAME };
+        public enum MessageType { Meta, Chat, Game };
 
         // Type can be set by both server and client with different meanings for the other fields
         public MessageType Type { get; set; }
