@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json.Serialization;
+
 namespace Doppelkopf.Models
 {
     // Message can come from server (ServerMessage) or client (Message that is extended by Server with Token to get ClientMessage),

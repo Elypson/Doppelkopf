@@ -47,27 +47,25 @@ namespace Doppelkopf.Services
                     break;
             }
         }
-
-        private struct NewTableProperties
-        {
-            public string name;
-            public string password;
-            public bool hidden;
-        }
-
-        private struct JoinTableProperties
-        {
-            public int tableID;
-            public string password;
-        }
-
+        
         private void handleJoinTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
         {
             try
             {
-                var joinTableProperties = JsonSerializer.Deserialize<JoinTableProperties>(message.Text);
+                var joinTableProperties = message.Text.Split(",");
+                int tableID = -1;
+                string password = null;
+                if(joinTableProperties.Count() > 0)
+                {
+                    int.TryParse(joinTableProperties[0], out tableID);
 
-                var gameController = gameControllers.FirstOrDefault(game => game.TableID == joinTableProperties.tableID && (String.IsNullOrEmpty(game.Password) || game.Password == joinTableProperties.password));
+                    if(joinTableProperties.Count() > 1)
+                    {
+                        password = joinTableProperties[1];
+                    }
+                }
+
+                var gameController = gameControllers.FirstOrDefault(game => game.TableID == tableID && (String.IsNullOrEmpty(game.Password) || game.Password == password));
 
                 if(gameController != null)
                 {
@@ -85,7 +83,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleLeaveTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<GameController> gameControllers, ClientMessage message)
+        private void handleLeaveTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
         {
             var sender = users.FirstOrDefault(user => user.ConnectionID == message.Token);
 
@@ -95,7 +93,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleCreateTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<GameController> gameControllers, ClientMessage message)
+        private void handleCreateTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
         {
             var numbers = Enumerable.Range(1, 10000); // limit of 10000 tables but should never be an issue
             var newTableID = numbers.FirstOrDefault(number => !gameControllers.Exists(gameController => gameController.TableID == number));
@@ -104,9 +102,27 @@ namespace Doppelkopf.Services
             {
                 try
                 {
-                    NewTableProperties newTableProperties = JsonSerializer.Deserialize<NewTableProperties>(message.Text);
+                    var parts = message.Text.Split(",");
+                    string name = "", password = null;
+                    bool hidden = false;
+                    if(parts.Count() > 0)
+                    {
+                        name = parts[0];
+                        if(parts.Count() > 1)
+                        {
+                            password = parts[1];
+                            if(parts.Count() > 2)
+                            {
+                                hidden = parts[2] == "true";
+                            }
+                        }
+                    }
 
-                    gameControllers.Add(new GameController(sendService, users, clientConnectionControllers, newTableID, newTableProperties.name, newTableProperties.password, newTableProperties.hidden, users.FirstOrDefault(user => user.ConnectionID == message.Token)));
+                    var founder = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+
+                    gameControllers.Add(new GameController(sendService, users, clientConnectionControllers, newTableID, name, password, hidden, founder));
+
+                    founder.TableID = newTableID;
 
                     sendService.SendTo(clientConnectionControllers.Select(c => c.Socket), new ServerMessage
                     {
@@ -163,7 +179,7 @@ namespace Doppelkopf.Services
             var response = new ServerMessage
             {
                 Type = Message.MessageType.Meta,
-                SubType = "userlist",
+                SubType = "listUsers",
                 Text = userList
             };
 
@@ -171,14 +187,15 @@ namespace Doppelkopf.Services
                    select controller.Socket).First(), response);
         }
 
-        private struct ExistingTableProperties
+        private class ExistingTableProperties
         {
-            public string name;
-            public bool hasPassword;
-            public bool isHidden; // if user is owner
+            public int ID { set; get; }
+            public string Name { set; get;}
+            public bool HasPassword { set; get; }
+            public bool IsHidden { set; get; }
         }
 
-        private void handleListTablesSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<GameController> gameControllers, ClientMessage message)
+        private void handleListTablesSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
         {
             var sender = users.FirstOrDefault(user => user.ConnectionID == message.Token);
 
@@ -193,9 +210,10 @@ namespace Doppelkopf.Services
                 {
                     tableList.Add(new ExistingTableProperties
                     {
-                        name = gameController.Name,
-                        hasPassword = String.IsNullOrEmpty(gameController.Password),
-                        isHidden = gameController.Hidden
+                        ID = gameController.TableID,
+                        Name = gameController.Name,
+                        HasPassword = !String.IsNullOrEmpty(gameController.Password),
+                        IsHidden = gameController.Hidden
                     });
                 }
 

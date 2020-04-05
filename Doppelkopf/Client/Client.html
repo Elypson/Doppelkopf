@@ -20,9 +20,8 @@
             });
 
             ws.addEventListener('message', function (event) {
+                console.log("raw: " + event.data);
                 const obj = JSON.parse(event.data);
-
-                console.log(event.data);
 
                 switch (obj.Type) {
                     case 0: /* META */
@@ -30,7 +29,7 @@
                             case 'token':
                                 token = obj.Text;
                                 ws.send('{"Type":0,"SubType":"name","Text":"' + username + '"}');
-                                ws.send(JSON.stringify({ "Type": 0, "SubType": "userlist" }));
+                                ws.send(JSON.stringify({ "Type": 0, "SubType": "listUsers" }));
                                 myUsername = username;
                                 break;
                             case 'join':
@@ -73,7 +72,18 @@
             var password = document.getElementsByName('password')[0];
             var hidden = document.getElementsByName('hidden')[0];
 
-            ws.send(JSON.stringify({ "Type": 0, "SubType": "createTable", "Text": { "Name": tableName.value, "Password": password.value, "Hidden": hidden ? "true" : "false" } }));
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "createTable", "Text": tableName.value + "," + password.value + "," + (hidden.checked ? "true" : "false") }));
+        }
+
+        function joinTable() {
+            var tableName = document.getElementsByName('tableName')[0];
+            var password = document.getElementsByName('password')[0];
+
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "joinTable", "Text": tableName.value + "," + password.value }));
+        }
+
+        function leaveTable() {
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "leaveTable"}));
         }
 
         function userList() {
@@ -100,8 +110,10 @@
     <input type="text" name="password" onkeypress="if(event.which == 13 || event.keyCode == 13) createTable();" />
     <input type="checkbox" name="hidden" />
     <input type="button" value="Create Table" onclick="createTable();" />
+    <input type="button" value="Join Table" onclick="joinTable();" />
+    <input type="button" value="Leave Table" onclick="leaveTable();" />
 
-    <input type="button" name="User list" onclick="userList();" />
-    <input type="button" name="Table list" onclick="tableList();" />
+    <input type="button" name="User list" value="List users" onclick="userList();" />
+    <input type="button" name="Table list" value="List tables" onclick="tableList();" />
 </body>
 </html>

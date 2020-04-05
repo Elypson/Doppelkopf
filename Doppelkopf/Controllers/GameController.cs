@@ -38,7 +38,7 @@ namespace Doppelkopf.Controllers
             this.sendService = sendService;
             this.users = users;
             this.clientControllers = clientControllers;
-            TableID = TableID;
+            TableID = tableID;
             Name = name;
             Password = password;
             Hidden = hidden;

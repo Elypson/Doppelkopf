@@ -9,7 +9,7 @@ namespace Doppelkopf.Models
     public class PlayerToActQueue
     {
         private readonly List<Player> players;
-        private readonly Queue<List<Player>> playersToAct;
+        private readonly Queue<List<Player>> playersToAct = new Queue<List<Player>>();
 
         public PlayerToActQueue(List<Player> players)
         {

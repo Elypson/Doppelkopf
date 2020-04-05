@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Doppelkopf.Interfaces;
@@ -28,18 +29,18 @@ namespace Doppelkopf.Controllers
         {
             var buffer = new byte[1024 * 4];
 
-            WebSocketReceiveResult result = await Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            WebSocketReceiveResult result;
+            try
+            {
+                result = await Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            }
+            catch(WebSocketException)
+            {
+                return; // if connection broke immediately
+            }
+
             while (!result.CloseStatus.HasValue)
             {
-                try
-                {
-                    result = await Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                }
-                catch(WebSocketException) // leave loop gracefully
-                {
-                    return;
-                }
-
                 try
                 {
                     Message message = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer, 0, result.Count));
@@ -51,6 +52,15 @@ namespace Doppelkopf.Controllers
                 {
                     Debug.WriteLine(e);
                     // ignore invalid messages
+                }
+
+                try
+                {
+                    result = await Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                }
+                catch (WebSocketException) // leave loop gracefully
+                {
+                    return;
                 }
             }
 
