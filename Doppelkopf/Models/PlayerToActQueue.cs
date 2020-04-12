@@ -28,7 +28,7 @@ namespace Doppelkopf.Models
                 return;
             }
 
-            var permutations = PermutationBuilderService.GetKCombs(activePlayers, 4);
+            var permutations = PermutationBuilderService.GetShiftingWindowCombinations(activePlayers, 4);
 
             foreach(var permutation in permutations)
             {
