@@ -9,7 +9,8 @@ namespace Doppelkopf.Interfaces
     public interface IClientConnectionController
     {
         WebSocket Socket { get; }
-        string ConnectionID { get; }
+        string Token { get; }
+        bool Initialized { get; }
 
         event EventHandler MessageReceived;
 
@@ -23,5 +24,11 @@ namespace Doppelkopf.Interfaces
 
         // start client event loop
         Task HandleAsync(HttpContext context);
+
+        // create a new Token because this connection belongs to a new user
+        public string CreateToken();
+
+        // set a Token because this connection belongs to an existing user
+        public void ResetToken(string Token);
     }
 }

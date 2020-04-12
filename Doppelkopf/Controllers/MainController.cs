@@ -23,15 +23,17 @@ namespace Doppelkopf.Controllers
         private readonly ISendService sendService;
         private readonly IChatMessageService chatMessageService;
         private readonly IMetaMessageService metaMessageService;
+        private readonly IUserPermissionService userPermissionService;
 
         // TableID maps to game controller
         List<IGameController> gameControllers = new List<IGameController>();    
 
-        public MainController(ISendService _sendService, IMetaMessageService _metaMessageService, IChatMessageService _chatMessageService)
+        public MainController(ISendService _sendService, IMetaMessageService _metaMessageService, IChatMessageService _chatMessageService, IUserPermissionService _userPermissionService)
         {
             sendService = _sendService;
             chatMessageService = _chatMessageService;
             metaMessageService = _metaMessageService;
+            userPermissionService = _userPermissionService;
             serverThread.Start(this);
         }
 
@@ -49,29 +51,25 @@ namespace Doppelkopf.Controllers
             // socket needs to be initialized before we can continue
             newController.InitializeAsync(context).Wait();
 
-            // let client know their token
-            sendService.SendSyncToClient(newController.Socket, new ServerMessage
-            {
-                Type = Message.MessageType.Meta,
-                SubType = "token",
-                Text = context.Connection.Id
-            });
-
+            // user has to ask for token with "getToken" or "reclaim", if he still has one;
+            // in former case, server sends token;
+            // in latter case, server sends "accept" (if user exists) or "token" (if user expired)
+            
             await newController.HandleAsync(context);
             
             clientControllers.Remove(newController);
 
             // find user that has left but keep him in case that reclaim is demanded
-            var leftUser = users.Find(user => user.ConnectionID == newController.ConnectionID);
+            var leftUser = users.Find(user => user.Token == newController.Token);
 
             leftUser.Online = false;
 
             sendService.SendTo(from clientController in clientControllers select clientController.Socket, new ServerMessage { Type = Message.MessageType.Meta, SubType = "quit", Text = leftUser.Name });
         }
-
-        void handleGameMessage(ClientMessage message)
+         
+        void handleGameMessage(IUserPermissionService userPermissionService, ClientMessage message)
         {
-            var user = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+            var user = users.FirstOrDefault(user => user.Token == message.Token);
 
             if (user == null || user.TableID == User.NO_TABLE)
                 return;
@@ -102,13 +100,13 @@ namespace Doppelkopf.Controllers
                     switch(message.Type)
                     {
                         case Message.MessageType.Meta:
-                            mainController.metaMessageService.HandleMessage(mainController.users, mainController.clientControllers, mainController.gameControllers, message);
+                            mainController.metaMessageService.HandleMessage(mainController.users, mainController.clientControllers, mainController.gameControllers, mainController.userPermissionService, message);
                             break;
                         case Message.MessageType.Chat:
-                            mainController.chatMessageService.HandleMessage(mainController.users, mainController.clientControllers, message);
+                            mainController.chatMessageService.HandleMessage(mainController.users, mainController.clientControllers, mainController.userPermissionService, message);
                             break;
                         case Message.MessageType.Game:
-                            mainController.handleGameMessage(message);
+                            mainController.handleGameMessage(mainController.userPermissionService, message);
                             break;
                     }
                 }

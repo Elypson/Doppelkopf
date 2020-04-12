@@ -14,6 +14,7 @@ namespace Doppelkopf.Models
     // start: start the game
     public class ClientMessage : Message
     {
+        // token is initially ConnectionID but is replaced with GUID Token later on
         public ClientMessage(Message message, string token) : base(message)
         {
             Token = token;

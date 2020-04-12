@@ -28,6 +28,7 @@
                         switch (obj.SubType) {
                             case 'token':
                                 token = obj.Text;
+                            case 'accept':
                                 ws.send('{"Type":0,"SubType":"name","Text":"' + username + '"}');
                                 ws.send(JSON.stringify({ "Type": 0, "SubType": "listUsers" }));
                                 myUsername = username;
@@ -94,6 +95,14 @@
             ws.send(JSON.stringify({ "Type": 0, "SubType": "listTables" }));
         }
 
+        function reclaim() {
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "reclaim", "Text": document.getElementsByName('token')[0].value }));
+        }
+
+        function getToken() {
+            ws.send(JSON.stringify({ "Type": 0, "SubType": "getToken"}));
+        }
+
     </script>
 </head>
 <body>
@@ -115,5 +124,9 @@
 
     <input type="button" name="User list" value="List users" onclick="userList();" />
     <input type="button" name="Table list" value="List tables" onclick="tableList();" />
+
+    <input type="text" name="token" placeholder="token" />
+    <input type="button" name="reclaim" value="Reclaim" onclick="reclaim();" />
+    <input type="button" name="reclaim" value="Get new token" onclick="getToken();" />
 </body>
 </html>

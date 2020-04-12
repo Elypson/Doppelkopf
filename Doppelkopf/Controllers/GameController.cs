@@ -16,7 +16,7 @@ namespace Doppelkopf.Controllers
         public bool Hidden { private set; get; }
         public List<User> Administrators { private set; get;} = new List<User>();
         private readonly List<User> users;
-        private readonly List<Player> players;
+        private readonly List<Player> players = new List<Player>();
         private readonly List<ClientConnectionController> clientControllers;
         private readonly ISendService sendService;
         private readonly PlayerToActQueue playerToActQueue;
@@ -75,7 +75,6 @@ namespace Doppelkopf.Controllers
             {
                 case State.Pause:
                     return handlePauseState(message);
-                    break;
                 case State.Shuffling:
                     //return handleShufflingState(message);
                     break;

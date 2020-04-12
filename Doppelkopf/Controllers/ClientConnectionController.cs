@@ -15,14 +15,32 @@ namespace Doppelkopf.Controllers
     public class ClientConnectionController : IClientConnectionController
     {
         public WebSocket Socket { protected set; get; }
-        public string ConnectionID { protected set; get; }
+        public string Token { protected set; get; }
+        public bool Initialized { protected set; get; } = false;
 
         public event EventHandler MessageReceived;
 
         public async Task InitializeAsync(HttpContext context)
         {
             Socket = await context.WebSockets.AcceptWebSocketAsync();
-            ConnectionID = context.Connection.Id;
+
+            // set temporary token
+            Token = context.Connection.Id;
+        }
+
+        // create a new Token because this connection belongs to a new user
+        public string CreateToken()
+        {
+            Token = Guid.NewGuid().ToString();
+            Initialized = true;
+            return Token;
+        }
+
+        // set a Token because this connection belongs to an existing user
+        public void ResetToken(string Token)
+        {
+            this.Token = Token;
+            Initialized = true;
         }
 
         public async Task HandleAsync(HttpContext context)
@@ -44,7 +62,7 @@ namespace Doppelkopf.Controllers
                 try
                 {
                     Message message = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer, 0, result.Count));
-                    var clientMessage = new ClientMessage(message, context.Connection.Id);
+                    var clientMessage = new ClientMessage(message, Token);
 
                     MessageReceived?.Invoke(this, new IClientConnectionController.MessageReceivedArgs { Message = clientMessage });
                 }

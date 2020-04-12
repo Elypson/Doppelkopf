@@ -3,9 +3,9 @@ namespace Doppelkopf.Models
 {
     public class User : IComparable
     {
-        public User(string connectionID, string name)
+        public User(string token, string name)
         {
-            ConnectionID = connectionID;
+            this.Token = token;
             Name = name;
             TableID = NO_TABLE;
             Online = true;
@@ -13,7 +13,7 @@ namespace Doppelkopf.Models
 
         public const int NO_TABLE = -1;
 
-        public string ConnectionID { get; }
+        public string Token { get; }
         public string Name { get; set; }
         public int TableID { get; set; }
         public bool Online { get; set; }
@@ -31,7 +31,7 @@ namespace Doppelkopf.Models
                 throw new ArgumentException("obj is not a User");
             }
 
-            return ConnectionID.CompareTo(otherUser.ConnectionID);
+            return Token.CompareTo(otherUser.Token);
         }
     }
 }

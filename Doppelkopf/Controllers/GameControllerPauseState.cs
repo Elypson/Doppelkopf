@@ -10,7 +10,7 @@ namespace Doppelkopf.Controllers
         {
             // if table owner decides to start, starting works
 
-            User sourceUser = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+            User sourceUser = users.FirstOrDefault(user => user.Token == message.Token);
 
             if(sourceUser != null)
             {

@@ -26,6 +26,7 @@ namespace Doppelkopf
             services.AddSingleton<IMetaMessageService, MetaMessageService>();
             services.AddSingleton<IChatMessageService, ChatMessageService>();
             services.AddSingleton<IMainController, MainController>();
+            services.AddSingleton<IUserPermissionService, UserPermissionService>();
         }
 
         // handle incoming websocket requests and http-client requests

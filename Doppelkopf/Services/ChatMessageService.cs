@@ -16,16 +16,15 @@ namespace Doppelkopf.Services
             sendService = _sendService;
         }
 
-        public void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, ClientMessage message)
+        public void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
-            // does user exist? only named users can send messages (if not named, client should use META "name")
-            var existingUser = users.Where(user => user.ConnectionID == message.Token).FirstOrDefault();
-
-            if (existingUser != null)
+            if (userPermissionService.IsMessageFromNamedUser(users, message))
             {
+                var existingUser = users.FirstOrDefault(user => user.Token == message.Token);
+
                 var otherClientsAtSameTableOrGlobal = clientConnectionControllers.Where(client =>
-                    users.Exists(user => client.ConnectionID == user.ConnectionID &&
-                    user.TableID == existingUser.TableID && user.ConnectionID != existingUser.ConnectionID));
+                    users.Exists(user => client.Token == user.Token &&
+                    user.TableID == existingUser.TableID && user.Token != existingUser.Token));
 
                 var serverMessage = new ServerMessage(message, existingUser.Name);
 

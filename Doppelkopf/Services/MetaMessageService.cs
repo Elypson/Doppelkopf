@@ -18,38 +18,99 @@ namespace Doppelkopf.Services
             sendService = _sendService;
         }
 
-        public void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
+        public void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             switch (message.SubType)
             {
+                case "getToken":
+                    handleGetTokenSubType(users, clientConnectionControllers, message);
+                    break;
+
+                case "reclaim":
+                    handleReclaimSubType(users, clientConnectionControllers, message);
+                    break;
+
                 case "name":
-                    handleNameSubType(users, clientConnectionControllers, message);
+                    handleNameSubType(users, clientConnectionControllers, userPermissionService, message);
                     break;
 
                 case "listUsers":
-                    handleListUsersSubType(users, clientConnectionControllers, message);
+                    handleListUsersSubType(users, clientConnectionControllers, userPermissionService, message);
                     break;
 
                 case "listTables":
-                    handleListTablesSubType(users, clientConnectionControllers, gameControllers, message);
+                    handleListTablesSubType(users, clientConnectionControllers, gameControllers, userPermissionService, message);
                     break;
 
                 case "createTable":
-                    handleCreateTableSubType(users, clientConnectionControllers, gameControllers, message);
+                    handleCreateTableSubType(users, clientConnectionControllers, gameControllers, userPermissionService, message);
                     break;
 
                 case "joinTable":
-                    handleJoinTableSubType(users, clientConnectionControllers, gameControllers, message);
+                    handleJoinTableSubType(users, clientConnectionControllers, gameControllers, userPermissionService, message);
                     break;
 
                 case "leaveTable":
-                    handleLeaveTableSubType(users, clientConnectionControllers, gameControllers, message);
+                    handleLeaveTableSubType(users, clientConnectionControllers, gameControllers, userPermissionService, message);
                     break;
             }
         }
-        
-        private void handleJoinTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
+
+        private void handleGetTokenSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, ClientMessage message)
         {
+            // set token to GUID and let user know
+            var connection = clientConnectionControllers.FirstOrDefault(controller => controller.Token == message.Token);
+
+            if (connection != null)
+            {
+                string newToken = connection.CreateToken();
+
+                sendService.SendSyncToClient(connection.Socket, new ServerMessage
+                {
+                    Type = Message.MessageType.Meta,
+                    SubType = "token",
+                    Text = newToken
+                });
+            }
+        }
+
+        private void handleReclaimSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, ClientMessage message)
+        {
+            // if some user with such GUID is found, token is valid and we let client know;
+            // otherwise, new GUID is assigned
+            var connection = clientConnectionControllers.FirstOrDefault(controller => controller.Token == message.Token);
+            
+            if (connection != null)
+            {
+                var user = users.FirstOrDefault(user => user.Token == message.Text);
+
+                if (user == null)
+                {
+                    handleGetTokenSubType(users, clientConnectionControllers, message);
+                }
+                else
+                {
+                    connection.ResetToken(message.Text);
+
+                    user.Online = true;
+
+                    sendService.SendSyncToClient(connection.Socket, new ServerMessage
+                    {
+                        Type = Message.MessageType.Meta,
+                        SubType = "accept"
+                    });
+                }
+            }
+        }
+
+        private void handleJoinTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        {
+            if(!userPermissionService.IsMessageFromNamedUser(users, message))
+            {
+                // drop?
+                return;
+            }
+
             try
             {
                 var joinTableProperties = message.Text.Split(",");
@@ -69,7 +130,7 @@ namespace Doppelkopf.Services
 
                 if(gameController != null)
                 {
-                    var sender = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+                    var sender = users.FirstOrDefault(user => user.Token == message.Token);
 
                     if (sender != null)
                     {
@@ -83,9 +144,15 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleLeaveTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
+        private void handleLeaveTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
-            var sender = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+            if (!userPermissionService.IsMessageFromNamedUser(users, message))
+            {
+                // drop?
+                return;
+            }
+
+            var sender = users.FirstOrDefault(user => user.Token == message.Token);
 
             if (sender != null)
             {
@@ -93,8 +160,14 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleCreateTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
+        private void handleCreateTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
+            if(!userPermissionService.IsMessageFromNamedUser(users, message))
+            {
+                // drop?
+                return;
+            }
+
             var numbers = Enumerable.Range(1, 10000); // limit of 10000 tables but should never be an issue
             var newTableID = numbers.FirstOrDefault(number => !gameControllers.Exists(gameController => gameController.TableID == number));
 
@@ -118,7 +191,7 @@ namespace Doppelkopf.Services
                         }
                     }
 
-                    var founder = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+                    var founder = users.FirstOrDefault(user => user.Token == message.Token);
 
                     gameControllers.Add(new GameController(sendService, users, clientConnectionControllers, newTableID, name, password, hidden, founder));
 
@@ -137,15 +210,28 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleNameSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers,
-            ClientMessage message)
+        private void handleNameSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
-            // does user exist?
-            var existingUser = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+            if(!userPermissionService.IsMessageFromTokenizedUser(clientConnectionControllers, message))
+            {
+                // drop?
+                return;
+            }
+
+            var existingUser = users.FirstOrDefault(user => user.Token == message.Token);
 
             ServerMessage responseToAll;
             if (existingUser == null)
             {
+                // client connection controllers needs to be initialized by having a new or reclaimed token
+                var initialized = clientConnectionControllers.FirstOrDefault(controller => controller.Token == message.Token)?.Initialized;
+                
+                if(initialized == null || initialized == false)
+                {
+                    // drop?
+                    return;
+                }
+
                 User user = new User(message.Token, message.Text);
                 users.Add(user);
 
@@ -172,8 +258,14 @@ namespace Doppelkopf.Services
             sendService.SendTo(from clientController in clientConnectionControllers select clientController.Socket, responseToAll);
         }
 
-        private void handleListUsersSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, ClientMessage message)
+        private void handleListUsersSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
+            if(!userPermissionService.IsMessageFromNamedUser(users, message))
+            {
+                // drop?
+                return;
+            }
+
             string userList = JsonSerializer.Serialize(from user in users where user.Online select new {Username = user.Name, TableID = user.TableID});
 
             var response = new ServerMessage
@@ -183,7 +275,7 @@ namespace Doppelkopf.Services
                 Text = userList
             };
 
-            sendService.SendSyncToClient((from controller in clientConnectionControllers where controller.ConnectionID == message.Token
+            sendService.SendSyncToClient((from controller in clientConnectionControllers where controller.Token == message.Token
                    select controller.Socket).First(), response);
         }
 
@@ -195,9 +287,15 @@ namespace Doppelkopf.Services
             public bool IsHidden { set; get; }
         }
 
-        private void handleListTablesSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, ClientMessage message)
+        private void handleListTablesSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
-            var sender = users.FirstOrDefault(user => user.ConnectionID == message.Token);
+            if (!userPermissionService.IsMessageFromNamedUser(users, message))
+            {
+                // drop?
+                return;
+            }
+
+            var sender = users.FirstOrDefault(user => user.Token == message.Token);
 
             if (sender != null)
             {
@@ -219,7 +317,7 @@ namespace Doppelkopf.Services
 
                 var tableListString = JsonSerializer.Serialize(tableList);
 
-                var socket = (from client in clientConnectionControllers where client.ConnectionID == sender.ConnectionID select client.Socket).FirstOrDefault();
+                var socket = (from client in clientConnectionControllers where client.Token == sender.Token select client.Socket).FirstOrDefault();
 
                 if (socket != null)
                 {
