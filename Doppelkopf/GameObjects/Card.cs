@@ -27,6 +27,20 @@ namespace Doppelkopf.GameObjects
             this.suit = suit;
         }
 
+        // how many points does it provide in a trick
+        public int Points()
+        {
+            switch(value)
+            {
+                case Value.ACE: return 11;
+                case Value.TEN: return 10;
+                case Value.KING: return 4;
+                case Value.QUEEN: return 3;
+                case Value.JACK: return 2;
+                default: return 0;
+            }
+        }
+
         public override string ToString()
         {
             string result = "";

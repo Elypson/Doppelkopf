@@ -24,7 +24,8 @@ namespace Doppelkopf.Controllers
         private readonly RuleSet ruleSet;
         public List<Player> currentPlayersToAct = new List<Player>();
         public List<Card> allCards = new List<Card>();
-        public Dictionary<Player, List<Card>> assignedCards = new Dictionary<Player, List<Card>>();
+        public Dictionary<Player, List<Card>> assignedHands = new Dictionary<Player, List<Card>>();
+        public Dictionary<Player, HandCharacteristics> handCharacteristics = new Dictionary<Player, HandCharacteristics>();
 
         public enum State
         {
@@ -57,16 +58,19 @@ namespace Doppelkopf.Controllers
 
         private void initializeAllCards()
         {
-            foreach (var value in (Card.Value[])Enum.GetValues(typeof(Card.Value)))
+            for (int n = 0; n < 2; ++n) // DOPPELkopf :)
             {
-                if (value == Card.Value.NINE && !ruleSet.UseNines)
+                foreach (var value in (Card.Value[])Enum.GetValues(typeof(Card.Value)))
                 {
-                    continue;
-                }
+                    if (value == Card.Value.NINE && !ruleSet.UseNines)
+                    {
+                        continue;
+                    }
 
-                foreach (var suit in (Card.Suit[])Enum.GetValues(typeof(Card.Suit)))
-                {
-                    allCards.Add(new Card(value, suit));
+                    foreach (var suit in (Card.Suit[])Enum.GetValues(typeof(Card.Suit)))
+                    {
+                        allCards.Add(new Card(value, suit));
+                    }
                 }
             }
         }
@@ -101,10 +105,8 @@ namespace Doppelkopf.Controllers
                     return handlePauseState(message);
                 case State.Shuffling:
                     return handleShufflingState(message);
-                    break;
                 case State.Premove:
-                    //return handlePremoveState(message);
-                    break;
+                    return handlePremoveState(message);
             }
 
             return state;
