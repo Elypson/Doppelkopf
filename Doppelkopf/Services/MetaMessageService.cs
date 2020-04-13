@@ -211,6 +211,8 @@ namespace Doppelkopf.Services
                                             case "secondDulleTrumpsFirst": ruleSet.SecondDulleTrumpsFirst = keyValue[1] == "true"; break;
                                             case "bothPigletsTrumpAll": ruleSet.BothPigletsTrumpAll = keyValue[1] == "true"; break;
                                             case "reContraAtHochzeitAfterFinderTrick": ruleSet.ReContraAtHochzeitAfterFinderTrick = keyValue[1] == "true"; break;
+                                            case "withReshufflingAtFiveKings": ruleSet.WithReshufflingAtFiveKings = keyValue[1] == "true"; break;
+                                            case "withReshufflingAtEightyPoints": ruleSet.WithReshufflingAtEightyPoints = keyValue[1] == "true"; break;
                                         }
                                     }
                                     

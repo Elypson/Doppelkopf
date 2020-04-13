@@ -19,7 +19,8 @@ namespace Doppelkopf.Controllers
                     // number of players sufficient?
                     if(players.Where(player => !player.SittingOut).Count() >= 4)
                     {
-                        // playerToActQueue should work then automatically
+                        currentPlayersToAct = playerToActQueue.GetPlayersToAct();
+                        
                         return State.Shuffling;
                     }
                     else

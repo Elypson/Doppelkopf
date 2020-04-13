@@ -12,6 +12,8 @@ namespace Doppelkopf.GameObjects
             SecondDulleTrumpsFirst = true;
             BothPigletsTrumpAll = false;
             ReContraAtHochzeitAfterFinderTrick = true;
+            WithReshufflingAtFiveKings = true;
+            WithReshufflingAtEightyPoints = true;
         }
 
         public bool UseNines { set;  get; }
@@ -28,5 +30,7 @@ namespace Doppelkopf.GameObjects
         public bool SecondDulleTrumpsFirst { set; get; }
         public bool BothPigletsTrumpAll { set; get; }
         public bool ReContraAtHochzeitAfterFinderTrick { set; get; }
+        public bool WithReshufflingAtFiveKings { set; get; }
+        public bool WithReshufflingAtEightyPoints { set; get; }
     }
 }

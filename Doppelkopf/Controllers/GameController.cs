@@ -21,8 +21,11 @@ namespace Doppelkopf.Controllers
         private readonly List<ClientConnectionController> clientControllers;
         private readonly ISendService sendService;
         private readonly PlayerToActQueue playerToActQueue;
-        private readonly RuleSet ruleSet;        
-        
+        private readonly RuleSet ruleSet;
+        public List<Player> currentPlayersToAct = new List<Player>();
+        public List<Card> allCards = new List<Card>();
+        public Dictionary<Player, List<Card>> assignedCards = new Dictionary<Player, List<Card>>();
+
         public enum State
         {
             Pause,
@@ -48,6 +51,24 @@ namespace Doppelkopf.Controllers
             Administrators.Add(foundingUser);
             playerToActQueue = new PlayerToActQueue(players);
             this.ruleSet = ruleSet;
+
+            initializeAllCards();
+        }
+
+        private void initializeAllCards()
+        {
+            foreach (var value in (Card.Value[])Enum.GetValues(typeof(Card.Value)))
+            {
+                if (value == Card.Value.NINE && !ruleSet.UseNines)
+                {
+                    continue;
+                }
+
+                foreach (var suit in (Card.Suit[])Enum.GetValues(typeof(Card.Suit)))
+                {
+                    allCards.Add(new Card(value, suit));
+                }
+            }
         }
 
         private void updatePlayers()
@@ -79,7 +100,7 @@ namespace Doppelkopf.Controllers
                 case State.Pause:
                     return handlePauseState(message);
                 case State.Shuffling:
-                    //return handleShufflingState(message);
+                    return handleShufflingState(message);
                     break;
                 case State.Premove:
                     //return handlePremoveState(message);
