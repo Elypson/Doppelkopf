@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Doppelkopf.GameObjects;
 using Doppelkopf.Interfaces;
 using Doppelkopf.Models;
 using Doppelkopf.Services;
@@ -20,6 +21,7 @@ namespace Doppelkopf.Controllers
         private readonly List<ClientConnectionController> clientControllers;
         private readonly ISendService sendService;
         private readonly PlayerToActQueue playerToActQueue;
+        private readonly RuleSet ruleSet;        
         
         public enum State
         {
@@ -33,7 +35,7 @@ namespace Doppelkopf.Controllers
 
         private State state;
 
-        public GameController(ISendService sendService, List<User> users, List<ClientConnectionController> clientControllers, int tableID, string name, string password, bool hidden, User foundingUser)
+        public GameController(ISendService sendService, List<User> users, List<ClientConnectionController> clientControllers, int tableID, string name, string password, bool hidden, User foundingUser, RuleSet ruleSet)
         {
             this.sendService = sendService;
             this.users = users;
@@ -45,6 +47,7 @@ namespace Doppelkopf.Controllers
             state = State.Pause;
             Administrators.Add(foundingUser);
             playerToActQueue = new PlayerToActQueue(players);
+            this.ruleSet = ruleSet;
         }
 
         private void updatePlayers()

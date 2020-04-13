@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Doppelkopf.Controllers;
+using Doppelkopf.GameObjects;
 using Doppelkopf.Interfaces;
 using Doppelkopf.Models;
 
@@ -178,7 +179,9 @@ namespace Doppelkopf.Services
                     var parts = message.Text.Split(",");
                     string name = "", password = null;
                     bool hidden = false;
-                    if(parts.Count() > 0)
+                    RuleSet ruleSet = new RuleSet();
+
+                    if (parts.Count() > 0)
                     {
                         name = parts[0];
                         if(parts.Count() > 1)
@@ -187,13 +190,38 @@ namespace Doppelkopf.Services
                             if(parts.Count() > 2)
                             {
                                 hidden = parts[2] == "true";
+
+                                if(parts.Count() > 3)
+                                {
+                                    // split all parts to retrieve rules
+                                    for(int partID = 3; partID < parts.Count(); ++partID)
+                                    {
+                                        var keyValue = parts[partID].Split(":");
+                                        if(keyValue.Count() != 2)
+                                        {
+                                            continue;
+                                        }
+
+                                        switch(keyValue[0])
+                                        {
+                                            case "useNines": ruleSet.UseNines = keyValue[1] == "true"; break;
+                                            case "withArmut": ruleSet.WithArmut = keyValue[1] == "true"; break;
+                                            case "withFleischlos": ruleSet.WithFleischlos = keyValue[1] == "true"; break;
+                                            case "countingReContra": ruleSet.CountReContraBy = keyValue[1] == "+2" ? RuleSet.ReContraCounting.ADDING_TWO : RuleSet.ReContraCounting.DOUBLING; break;
+                                            case "secondDulleTrumpsFirst": ruleSet.SecondDulleTrumpsFirst = keyValue[1] == "true"; break;
+                                            case "bothPigletsTrumpAll": ruleSet.BothPigletsTrumpAll = keyValue[1] == "true"; break;
+                                            case "reContraAtHochzeitAfterFinderTrick": ruleSet.ReContraAtHochzeitAfterFinderTrick = keyValue[1] == "true"; break;
+                                        }
+                                    }
+                                    
+                                }
                             }
                         }
                     }
 
                     var founder = users.FirstOrDefault(user => user.Token == message.Token);
 
-                    gameControllers.Add(new GameController(sendService, users, clientConnectionControllers, newTableID, name, password, hidden, founder));
+                    gameControllers.Add(new GameController(sendService, users, clientConnectionControllers, newTableID, name, password, hidden, founder, ruleSet));
 
                     founder.TableID = newTableID;
 
