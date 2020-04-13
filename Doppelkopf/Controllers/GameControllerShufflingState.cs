@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Doppelkopf.GameObjects;
 using Doppelkopf.Models;
+using Doppelkopf.Services;
 
 namespace Doppelkopf.Controllers
 {
@@ -12,15 +13,17 @@ namespace Doppelkopf.Controllers
         {
             var rand = new Random();
 
-            assignedCards.Clear();
+            assignedHands.Clear();
 
             foreach(var card in allCards)
             {
-                assignedCards[currentPlayersToAct[rand.Next(4)]].Add(card);
+                assignedHands[currentPlayersToAct[rand.Next(4)]].Add(card);
             }
 
-            foreach(var playerCards in assignedCards)
+            foreach(var playerCards in assignedHands)
             {
+                handCharacteristics[playerCards.Key] = playerCards.Value.GetHandCharacteristics(ruleSet);
+
                 sendService.SendTo(new[]{ clientControllers.First(c => c.Token == playerCards.Key.User.Token).Socket}, new ServerMessage
                 {
                     Type = Message.MessageType.Game,
@@ -29,7 +32,6 @@ namespace Doppelkopf.Controllers
                 });
             }
             
-
             return State.Premove;
         }
     }

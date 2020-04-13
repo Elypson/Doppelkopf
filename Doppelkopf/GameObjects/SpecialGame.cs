@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Doppelkopf.GameObjects
 {
-    public enum Solo
+    public enum SpecialGame
     {
         CLUB_SOLO,
         SPADE_SOLO,
@@ -10,6 +10,8 @@ namespace Doppelkopf.GameObjects
         MIXED_SOLO,
         QUEEN_SOLO,
         JACK_SOLO,
-        FLEISCHLOS
+        FLEISCHLOS_SOLO,
+        ARMUT,
+        HOCHZEIT
     };
 }
