@@ -28,6 +28,7 @@ namespace Doppelkopf.Models
                 return;
             }
 
+            // we could allow different ones
             var permutations = PermutationBuilderService.GetShiftingWindowCombinations(activePlayers, 4);
 
             foreach(var permutation in permutations)
@@ -36,7 +37,7 @@ namespace Doppelkopf.Models
             }
         }
 
-        public List<Player> GetPlayersToAct()
+        public List<Player> DequeuePlayersToAct()
         {
             if(playersToAct.Count == 0)
             {

@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Doppelkopf.GameObjects
 {
-    public enum SpecialGame
+    public enum GameType
     {
         CLUB_SOLO,
         SPADE_SOLO,
@@ -12,6 +12,8 @@ namespace Doppelkopf.GameObjects
         JACK_SOLO,
         FLEISCHLOS_SOLO,
         ARMUT,
-        HOCHZEIT
+        HOCHZEIT,
+        RESHUFFLING, // very short game, then
+        NORMAL // healthy/gesund
     };
 }

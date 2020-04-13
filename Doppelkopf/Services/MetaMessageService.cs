@@ -213,6 +213,7 @@ namespace Doppelkopf.Services
                                             case "reContraAtHochzeitAfterFinderTrick": ruleSet.ReContraAtHochzeitAfterFinderTrick = keyValue[1] == "true"; break;
                                             case "withReshufflingAtFiveKings": ruleSet.WithReshufflingAtFiveKings = keyValue[1] == "true"; break;
                                             case "withReshufflingAtEightyPoints": ruleSet.WithReshufflingAtEightyPoints = keyValue[1] == "true"; break;
+                                            case "soloPlayerFirstToAct": ruleSet.SoloPlayerFirstToAct = keyValue[1] == "true"; break;
                                         }
                                     }
                                     

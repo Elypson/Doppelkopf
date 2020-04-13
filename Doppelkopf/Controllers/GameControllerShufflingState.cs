@@ -31,6 +31,8 @@ namespace Doppelkopf.Controllers
                     Text = string.Join(",", playerCards.Value)
                 });
             }
+
+            gameAnnouncements.Clear();
             
             return State.Premove;
         }

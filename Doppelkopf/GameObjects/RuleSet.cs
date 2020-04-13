@@ -14,6 +14,7 @@ namespace Doppelkopf.GameObjects
             ReContraAtHochzeitAfterFinderTrick = true;
             WithReshufflingAtFiveKings = true;
             WithReshufflingAtEightyPoints = true;
+            SoloPlayerFirstToAct = false;
         }
 
         public bool UseNines { set;  get; }
@@ -32,5 +33,6 @@ namespace Doppelkopf.GameObjects
         public bool ReContraAtHochzeitAfterFinderTrick { set; get; }
         public bool WithReshufflingAtFiveKings { set; get; }
         public bool WithReshufflingAtEightyPoints { set; get; }
+        public bool SoloPlayerFirstToAct { set; get; }
     }
 }

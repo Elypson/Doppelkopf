@@ -19,13 +19,15 @@ namespace Doppelkopf.Services
                     (t1, t2) => t1.Concat(new T[] { t2 }));
         }
 
-        // for a shifting window of (playerNumber - 4)
+        // for a shifting window of (playerNumber - 4); all players are the first player exactly once
         public static IEnumerable<IEnumerable<T>> GetShiftingWindowCombinations<T>(IEnumerable<T> list, int length) where T : IComparable
         {
+            IEnumerable<T> twiceList = list.Concat(list);
+            
             List<IEnumerable<T>> result = new List<IEnumerable<T>>();
-            for(int start = 0; start < list.Count() - (length - 1); ++start)
+            for(int start = 0; start < list.Count(); ++start)
             {
-                result.Add(list.Skip(start).Take(length));
+                result.Add(twiceList.Skip(start).Take(length));
             }
             return result;
         }

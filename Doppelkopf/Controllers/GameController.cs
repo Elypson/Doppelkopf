@@ -22,10 +22,13 @@ namespace Doppelkopf.Controllers
         private readonly ISendService sendService;
         private readonly PlayerToActQueue playerToActQueue;
         private readonly RuleSet ruleSet;
-        public List<Player> currentPlayersToAct = new List<Player>();
-        public List<Card> allCards = new List<Card>();
-        public Dictionary<Player, List<Card>> assignedHands = new Dictionary<Player, List<Card>>();
-        public Dictionary<Player, HandCharacteristics> handCharacteristics = new Dictionary<Player, HandCharacteristics>();
+        private List<Player> currentPlayersToAct = new List<Player>();
+        private int currentPlayerToActID;
+        private readonly List<Card> allCards = new List<Card>();
+        private readonly Dictionary<Player, List<Card>> assignedHands = new Dictionary<Player, List<Card>>();
+        private readonly Dictionary<Player, HandCharacteristics> handCharacteristics = new Dictionary<Player, HandCharacteristics>();
+        private readonly Dictionary<Player, GameType> gameAnnouncements = new Dictionary<Player, GameType>();
+        private GameType currentGame;
 
         public enum State
         {
@@ -106,7 +109,14 @@ namespace Doppelkopf.Controllers
                 case State.Shuffling:
                     return handleShufflingState(message);
                 case State.Premove:
-                    return handlePremoveState(message);
+                    return handlePreMoveState(message);
+                case State.Move:
+                    // return handleMoveState(message);
+                case State.FinishRound:
+                    // return handleFinishRoundState(message);
+                case State.CollectTrick:
+                    // return handleCollectTrickState(message);
+                    break;
             }
 
             return state;
