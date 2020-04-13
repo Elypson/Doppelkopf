@@ -17,6 +17,7 @@ namespace Doppelkopf.Controllers
                     {
                         gameAnnouncements[currentPlayersToAct[currentPlayerToActID]] = gameType;
 
+                        // 0) check if announcement is valid (only applies to Armut, Hochzeit or Schmeissen)
                         // 1) send to all that player made specific announcement
                         
                         if (++currentPlayerToActID == 4)

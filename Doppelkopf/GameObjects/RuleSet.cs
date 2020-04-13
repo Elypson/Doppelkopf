@@ -15,6 +15,11 @@ namespace Doppelkopf.GameObjects
             WithReshufflingAtFiveKings = true;
             WithReshufflingAtEightyPoints = true;
             SoloPlayerFirstToAct = false;
+            NumberOfNestedBuckRounds = 1;
+            AddBuckRoundAtLostSolo = true;
+            AddBuckRoundAtFullHeartTrick = !UseNines;
+            AddBuckRoundAtLostContra = false;
+            AddBuckRoundAtZeroGame = true;
         }
 
         public bool UseNines { set;  get; }
@@ -34,5 +39,10 @@ namespace Doppelkopf.GameObjects
         public bool WithReshufflingAtFiveKings { set; get; }
         public bool WithReshufflingAtEightyPoints { set; get; }
         public bool SoloPlayerFirstToAct { set; get; }
+        public int NumberOfNestedBuckRounds { set; get; } // 0 to disable buck rounds altogether
+        public bool AddBuckRoundAtLostSolo { set; get; }
+        public bool AddBuckRoundAtFullHeartTrick { set; get; } // makes little sense if nines are allowed
+        public bool AddBuckRoundAtLostContra { set; get; }
+        public bool AddBuckRoundAtZeroGame { set; get; }
     }
 }

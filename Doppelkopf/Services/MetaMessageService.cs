@@ -214,6 +214,17 @@ namespace Doppelkopf.Services
                                             case "withReshufflingAtFiveKings": ruleSet.WithReshufflingAtFiveKings = keyValue[1] == "true"; break;
                                             case "withReshufflingAtEightyPoints": ruleSet.WithReshufflingAtEightyPoints = keyValue[1] == "true"; break;
                                             case "soloPlayerFirstToAct": ruleSet.SoloPlayerFirstToAct = keyValue[1] == "true"; break;
+                                            case "numberOfNestedBuckRounds":
+                                                if (int.TryParse(keyValue[1], out int numberOfNestedBuckRounds))
+                                                {
+                                                    ruleSet.NumberOfNestedBuckRounds = numberOfNestedBuckRounds;
+                                                }
+                                                break;
+                                            case "addBuckRoundAtLostSolo": ruleSet.AddBuckRoundAtLostSolo = keyValue[1] == "true"; break;
+                                            case "addBuckRoundAtFullHeartTrick": ruleSet.AddBuckRoundAtFullHeartTrick = keyValue[1] == "true"; break;
+                                            case "addBuckRoundAtLostContra": ruleSet.AddBuckRoundAtLostContra = keyValue[1] == "true"; break;
+                                            case "addBuckRoundAtZeroGame": ruleSet.AddBuckRoundAtZeroGame = keyValue[1] == "true"; break;
+
                                         }
                                     }
                                     
