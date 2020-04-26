@@ -97,7 +97,7 @@ namespace Doppelkopf.Controllers
             }
         }
 
-        public State HandleMessage(ClientMessage message)
+        public void HandleMessage(ClientMessage message)
         {
             // just update all the time, should be cheap enough
             updatePlayers();
@@ -105,21 +105,26 @@ namespace Doppelkopf.Controllers
             switch(state)
             {
                 case State.Pause:
-                    return handlePauseState(message);
-                case State.Shuffling:
-                    return handleShufflingState(message);
-                case State.Premove:
-                    return handlePreMoveState(message);
-                case State.Move:
-                    // return handleMoveState(message);
-                case State.FinishRound:
-                    // return handleFinishRoundState(message);
-                case State.CollectTrick:
-                    // return handleCollectTrickState(message);
+                    state = handlePauseState(message);
                     break;
-            }
+                case State.Shuffling:
+                    state = handleShufflingState(message);
+                    break;
+                case State.Premove:
+                    state = handlePreMoveState(message);
+                    break;
+                case State.Move:
+                    // state = handleMoveState(message);
+                    break;
+                case State.FinishRound:
+                    // state = handleFinishRoundState(message);
+                    break;
+                case State.CollectTrick:
+                    // state = handleCollectTrickState(message);
+                    break;
+                // case FinishRound
 
-            return state;
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Doppelkopf.Services
             sendService = _sendService;
         }
 
-        public void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        public void HandleMessage(List<User> users, List<IClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if (userPermissionService.IsMessageFromNamedUser(users, message))
             {

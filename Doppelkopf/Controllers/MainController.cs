@@ -16,7 +16,7 @@ namespace Doppelkopf.Controllers
 {
     public class MainController : IMainController
     {
-        private readonly List<ClientConnectionController> clientControllers = new List<ClientConnectionController>();
+        private readonly List<IClientConnectionController> clientControllers = new List<IClientConnectionController>();
         private readonly ConcurrentQueue<ClientMessage> clientMessages = new ConcurrentQueue<ClientMessage>();
         private readonly Thread serverThread = new Thread(MainController.RunServer);
         private readonly List<User> users = new List<User>();

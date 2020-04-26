@@ -19,7 +19,7 @@ namespace Doppelkopf.Services
             sendService = _sendService;
         }
 
-        public void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        public void HandleMessage(List<User> users, List<IClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             switch (message.SubType)
             {
@@ -57,7 +57,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleGetTokenSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, ClientMessage message)
+        private void handleGetTokenSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, ClientMessage message)
         {
             // set token to GUID and let user know
             var connection = clientConnectionControllers.FirstOrDefault(controller => controller.Token == message.Token);
@@ -75,7 +75,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleReclaimSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, ClientMessage message)
+        private void handleReclaimSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, ClientMessage message)
         {
             // if some user with such GUID is found, token is valid and we let client know;
             // otherwise, new GUID is assigned
@@ -104,7 +104,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleJoinTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        private void handleJoinTableSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if(!userPermissionService.IsMessageFromNamedUser(users, message))
             {
@@ -145,7 +145,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleLeaveTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        private void handleLeaveTableSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if (!userPermissionService.IsMessageFromNamedUser(users, message))
             {
@@ -161,7 +161,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleCreateTableSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        private void handleCreateTableSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if(!userPermissionService.IsMessageFromNamedUser(users, message))
             {
@@ -252,7 +252,7 @@ namespace Doppelkopf.Services
             }
         }
 
-        private void handleNameSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        private void handleNameSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if(!userPermissionService.IsMessageFromTokenizedUser(clientConnectionControllers, message))
             {
@@ -300,7 +300,7 @@ namespace Doppelkopf.Services
             sendService.SendTo(from clientController in clientConnectionControllers select clientController.Socket, responseToAll);
         }
 
-        private void handleListUsersSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        private void handleListUsersSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if(!userPermissionService.IsMessageFromNamedUser(users, message))
             {
@@ -329,7 +329,7 @@ namespace Doppelkopf.Services
             public bool IsHidden { set; get; }
         }
 
-        private void handleListTablesSubType(List<User> users, List<ClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
+        private void handleListTablesSubType(List<User> users, List<IClientConnectionController> clientConnectionControllers, List<IGameController> gameControllers, IUserPermissionService userPermissionService, ClientMessage message)
         {
             if (!userPermissionService.IsMessageFromNamedUser(users, message))
             {

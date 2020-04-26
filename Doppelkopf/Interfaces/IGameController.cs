@@ -13,6 +13,6 @@ namespace Doppelkopf.Interfaces
         bool Hidden { get; }
         List<User> Administrators { get; }
 
-        State HandleMessage(ClientMessage message);
+        void HandleMessage(ClientMessage message);
     }
 }

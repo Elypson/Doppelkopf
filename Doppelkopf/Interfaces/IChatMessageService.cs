@@ -7,6 +7,6 @@ namespace Doppelkopf.Interfaces
 {
     public interface IChatMessageService
     {
-        void HandleMessage(List<User> users, List<ClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message);
+        void HandleMessage(List<User> users, List<IClientConnectionController> clientConnectionControllers, IUserPermissionService userPermissionService, ClientMessage message);
     }
 }

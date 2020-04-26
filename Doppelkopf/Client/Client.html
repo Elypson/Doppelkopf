@@ -102,6 +102,10 @@
             ws.send(JSON.stringify({ "Type": 0, "SubType": "getToken"}));
         }
 
+        function startGame() {
+            ws.send(JSON.stringify({ "Type": 2, "SubType": "start" }));
+        }
+
     </script>
 </head>
 <body>
@@ -127,5 +131,7 @@
     <input type="text" name="token" placeholder="token" />
     <input type="button" name="reclaim" value="Reclaim" onclick="reclaim();" />
     <input type="button" name="reclaim" value="Get new token" onclick="getToken();" />
+
+    <input type="button" name="start" value="Start game" onclick="startGame();" />
 </body>
 </html>

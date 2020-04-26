@@ -36,7 +36,7 @@ namespace Doppelkopf.Services
 
         // ===
 
-        public void SendToPlayer(List<IClientConnectionController> clientControllers, Player player, ServerMessage message)
+        public void SendTo(Player player, List<IClientConnectionController> clientControllers, ServerMessage message)
         {
             var clientController = clientControllers.FirstOrDefault(client => client.Token == player.User.Token);
             if (clientController != null)
@@ -47,7 +47,7 @@ namespace Doppelkopf.Services
 
         // ===
 
-        public void SendToPlayers(List<IClientConnectionController> clientControllers, IEnumerable<Player> players, ServerMessage message)
+        public void SendTo(IEnumerable<Player> players, List<IClientConnectionController> clientControllers, ServerMessage message)
         {
             var playerClientSockets = clientControllers.Where(client => players.Any(player => player.User.Token == client.Token)).Select(client => client.Socket);
             if (playerClientSockets.Count() > 0)

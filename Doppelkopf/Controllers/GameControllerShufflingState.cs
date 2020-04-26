@@ -15,10 +15,15 @@ namespace Doppelkopf.Controllers
 
             assignedHands.Clear();
 
-            foreach(var card in allCards)
+            // create shuffled copy of all cards
+            var shuffledCards = new List<Card>(allCards);
+            shuffledCards.Shuffle(new Random());
+
+            for(int i = 0; i < 4; ++i)
             {
-                assignedHands[currentPlayersToAct[rand.Next(4)]].Add(card);
+                assignedHands.Add(currentPlayersToAct[i], shuffledCards.GetRange(i * 10, 10));
             }
+            
 
             foreach(var playerCards in assignedHands)
             {
