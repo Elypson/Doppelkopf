@@ -1,6 +1,7 @@
 ﻿using System;
 namespace Doppelkopf.GameObjects
 {
+    // game types need to be ordered by dominance!
     public enum GameType
     {
         CLUB_SOLO,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -32,7 +33,27 @@ namespace Doppelkopf.Services
                 }
             }
         }
-    }
 
-    
+        // ===
+
+        public void SendToPlayer(List<IClientConnectionController> clientControllers, Player player, ServerMessage message)
+        {
+            var clientController = clientControllers.FirstOrDefault(client => client.Token == player.User.Token);
+            if (clientController != null)
+            {
+                SendTo(new []{ clientController.Socket }, message);
+            }
+        }
+
+        // ===
+
+        public void SendToPlayers(List<IClientConnectionController> clientControllers, IEnumerable<Player> players, ServerMessage message)
+        {
+            var playerClientSockets = clientControllers.Where(client => players.Any(player => player.User.Token == client.Token)).Select(client => client.Socket);
+            if (playerClientSockets.Count() > 0)
+            {
+                SendTo(playerClientSockets, message);
+            }
+        }
+    }
 }

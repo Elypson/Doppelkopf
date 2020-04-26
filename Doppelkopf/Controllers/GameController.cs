@@ -18,7 +18,7 @@ namespace Doppelkopf.Controllers
         public List<User> Administrators { private set; get;} = new List<User>();
         private readonly List<User> users;
         private readonly List<Player> players = new List<Player>();
-        private readonly List<ClientConnectionController> clientControllers;
+        private readonly List<IClientConnectionController> clientControllers;
         private readonly ISendService sendService;
         private readonly PlayerToActQueue playerToActQueue;
         private readonly RuleSet ruleSet;
@@ -28,7 +28,7 @@ namespace Doppelkopf.Controllers
         private readonly Dictionary<Player, List<Card>> assignedHands = new Dictionary<Player, List<Card>>();
         private readonly Dictionary<Player, HandCharacteristics> handCharacteristics = new Dictionary<Player, HandCharacteristics>();
         private readonly Dictionary<Player, GameType> gameAnnouncements = new Dictionary<Player, GameType>();
-        private GameType currentGame;
+        private GameType currentGameType;
 
         public enum State
         {
@@ -42,7 +42,7 @@ namespace Doppelkopf.Controllers
 
         private State state;
 
-        public GameController(ISendService sendService, List<User> users, List<ClientConnectionController> clientControllers, int tableID, string name, string password, bool hidden, User foundingUser, RuleSet ruleSet)
+        public GameController(ISendService sendService, List<User> users, List<IClientConnectionController> clientControllers, int tableID, string name, string password, bool hidden, User foundingUser, RuleSet ruleSet)
         {
             this.sendService = sendService;
             this.users = users;
