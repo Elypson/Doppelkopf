@@ -14,6 +14,7 @@ using System.IO;
 using Doppelkopf.Controllers;
 using Doppelkopf.Interfaces;
 using Doppelkopf.Services;
+using System.Web.Http.SelfHost;
 
 namespace Doppelkopf
 {
@@ -63,6 +64,13 @@ namespace Doppelkopf
                     await next();
                 }
             });
+
+            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(_baseAddress);
+            config.Routes.MapHttpRoute(
+              name: "DefaultApi",
+              routeTemplate: "api/{controller}/{id}",
+              defaults: new { id = RouteParameter.Optional }
+            );
 
             app.Use(async (context, next) =>
             {
